@@ -35,9 +35,9 @@ class MysqlConnectorManager:
                 return mysql.connector.connect(**self.config)
             except (mysql.connector.Error, IOError) as err:
                 if attempts is attempt:
-                    # Attempts to reconnect failed; returning None
+                    # Attempts to reconnect failed;
                     logger.error("Failed to connect, exiting without a connection: %s", err)
-                    return None
+                    raise err
                 logger.info(
                     "Connection failed: %s. Retrying (%d/%d)...",
                     err,
@@ -47,9 +47,8 @@ class MysqlConnectorManager:
                 # progressive reconnect delay
                 sleep(delay ** attempt)
                 attempt += 1
-        return None
 
-    def select(self, sqlstring: str) -> list | None:
+    def select(self, sqlstring: str) -> list:
 
         """
         Used only for reading actions to the database.
@@ -58,7 +57,7 @@ class MysqlConnectorManager:
         :type sqlstring: str
         :raise mysql.connector.Error | IOError: If it occurs, will be logged
         :return: Return always a list with at least one tuple, can also be empty.
-        :rtype: list[tuple] or None
+        :rtype: list[tuple]
         """
 
         mydb = self.init_conn()
@@ -68,13 +67,13 @@ class MysqlConnectorManager:
             cursor.execute(sqlstring)
         except (mysql.connector.Error, IOError) as err:
             logger.error("Something goes wrong while selecting data: %s", err)
-            return None
+            raise err
 
         result = cursor.fetchall()
         mydb.close()
         return result
 
-    def query(self, sqlstring, val=None) -> int | None:
+    def query(self, sqlstring, val=None) -> int:
 
         """
         Can be used for create, delete, update method to the database.
@@ -82,7 +81,7 @@ class MysqlConnectorManager:
         :param sqlstring: The query sql statement given as string
         :param val: Can be None or a list or tuple
         :raise mysql.connector.Error | IOError: If it occurs, will be logged
-        :return: integer about how many rows were affected, can be also 0 or None
+        :return: integer about how many rows were affected, can be also 0.
         :rtype: int
         """
 
@@ -99,7 +98,7 @@ class MysqlConnectorManager:
 
         except (mysql.connector.Error, IOError) as err:
             logger.error("Something goes wrong while querying the data: %s", err)
-            return None
+            raise err
 
         mydb.commit()
         mydb.close()

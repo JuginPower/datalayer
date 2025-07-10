@@ -44,7 +44,7 @@ class SqliteDatamanager:
             cursor.close()
             conn.commit()
 
-    def init_conn(self) -> sqlite3.Connection | None:
+    def init_conn(self) -> sqlite3.Connection:
 
         """
         Create the connection with the database and returns it.
@@ -52,7 +52,7 @@ class SqliteDatamanager:
         If not, then self.sql_script will be executed if given.
 
         :raise sqlite3.Error: If it occurs will be logged.
-        :return: SQLite database connection object or None.
+        :return: SQLite database connection object.
         :rtype: sqlite3.Connection
         """
 
@@ -60,7 +60,7 @@ class SqliteDatamanager:
             conn = sqlite3.connect(self.connection_string)
         except sqlite3.Error as err:
             logger.error("Something goes wrong while initializing the connection to an sqlite3 database: %s", err)
-            return None
+            raise err
         else:
             list_tables = conn.execute("select name from sqlite_master where type='table';").fetchall()
 
@@ -69,14 +69,14 @@ class SqliteDatamanager:
 
             return conn
 
-    def select(self, sqlstring: str) -> list | None:
+    def select(self, sqlstring: str) -> list:
 
         """
         Used only for reading actions to the database.
 
         :param sqlstring: The select statement as string given.
         :raise sqlite3.Error: If it occurs will be logged.
-        :return: Returns a list with tuple/s or None. Can also be an empty list.
+        :return: Returns a list with tuple/s. Can also be an empty list.
         :rtype: list[tuple]
         """
 
@@ -87,7 +87,7 @@ class SqliteDatamanager:
             mycursor.execute(sqlstring)
         except sqlite3.Error as err:
             logger.error("Something goes wrong while selecting data: %s", err)
-            return None
+            raise err
 
         result = mycursor.fetchall()
         mydb.close()
@@ -99,21 +99,21 @@ class SqliteDatamanager:
         Used for getting the structure from a specific table in the database.
 
         :param tablename: table name as string.
-        :return: A List with all results as tuples. It Can also be empty or None.
+        :return: A List with all results as tuples.
         :rtype: list[tuple]
         """
 
         return self.select(f"select * from pragma_table_info('{tablename}');")
 
-    def query(self, sqlstring, val=None) -> int | None:
+    def query(self, sqlstring, val=None) -> int:
 
         """
-        Is used for create, delete, update method to the database.
+        Is used as creating, delete and update method to the database.
 
         :param sqlstring: The query sql-statement given as string.
         :param val: Can be a tuple (if one record to insert), list (if many data) or None (if only querying).
         :type val: tuple | list | None.
-        :return: integer or None.
+        :return: integer.
         :rtype: int.
         """
 
@@ -130,7 +130,7 @@ class SqliteDatamanager:
 
         except sqlite3.Error as err:
             logger.error("Something goes wrong while querying data: %s", err)
-            return None
+            raise err
 
         mydb.commit()
         mydb.close()
