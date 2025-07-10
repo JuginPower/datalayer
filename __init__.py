@@ -1,2 +1,0 @@
-from mysql_connector_manager import MysqlConnectorManager
-from sqlite3_datamanager import SqliteDatamanager
