@@ -4,11 +4,11 @@ from time import sleep
 
 # Logging if something goes wrong
 logger = logging.getLogger(__name__)
-logging.basicConfig(filename="mysql_connector_manager.log", encoding="utf-8", level=logging.ERROR,
+logging.basicConfig(filename="mysql_data_manager.log", encoding="utf-8", level=logging.ERROR,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt='%Y-%m-%d, %H:%M:%S')
 
 
-class MysqlConnectorManager:
+class MysqlDataManager:
 
     def __init__(self, config: dict):
 
