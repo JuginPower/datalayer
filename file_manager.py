@@ -87,7 +87,7 @@ class FileManager:
                 print("Wrong Input")
             else:
                 if custom_index < 0 or custom_index >= len(files):
-                    print("Wrong Input")
+                    print("There is no data under the index:", custom_index)
                 else:
                     active = False
 
@@ -105,6 +105,15 @@ class CsvFileManager(FileManager):
 
     def write_new_csv(self, file_path: str | Path, csv_list):
 
+        """
+        This method writes a python list of records to the specified path on disk.
+        It doesn't check the structure of the data.
+
+        :param file_path: The path to the file.
+        :param csv_list: The data which will be written.
+        :return: True if it's done for awaiting purposes.
+        """
+
         with open(Path().joinpath(self.default_dir.parent, file_path), 'w', newline='',
                   encoding="ISO-8859-1") as csvfile:
 
@@ -112,6 +121,8 @@ class CsvFileManager(FileManager):
 
             for line in csv_list:
                 csv_writer.writerow(line)
+
+        return True
 
 
 class JsonFileManager(FileManager):
@@ -121,6 +132,17 @@ class JsonFileManager(FileManager):
 
     def write_new_json(self, file_path: str | Path, json_data: str | dict):
 
+        """
+        This method writes a python dictionary or jsonified string of records to the specified path on disk.
+        It doesn't check the structure of the data.
+
+        :param file_path: The path to the file.
+        :param json_data: The data which will be written. It can handel json_string and also python dictionaries
+        :return: True if it's done for awaiting purposes.
+        """
+
         with open(Path().joinpath(self.default_dir.parent, file_path), "w") as jsonfile:
 
-            json.dump(json_data, jsonfile) # Den Unterschied nochmal recherchieren zwischen dumps und dump
+            json.dump(json_data, jsonfile)
+
+        return True
