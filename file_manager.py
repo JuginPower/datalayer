@@ -11,12 +11,13 @@ class FileManager:
 
     """
 
-    def __init__(self, allowed_suffixes: tuple, default_subdir = "data"):
+    def __init__(self, allowed_suffixes: tuple, default_subdir: str | Path):
         """
         It initializes especially the current work directory with a specific default subdirectory path.
 
         :param allowed_suffixes: The allowed suffixes that depend on the parameter of the child class.
         :param default_subdir: The default subdirectory where the files should be.
+        :type default_subdir: str | Path
         """
 
         self.default_dir = Path.cwd().joinpath(default_subdir)
