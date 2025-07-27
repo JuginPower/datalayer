@@ -104,4 +104,27 @@ class MysqlDataManager:
         mydb.close()
         return mycursor.rowcount
 
+    def call_proc(self, procname: str, args=()):
 
+        """
+        This method was created for convenient calling of SQL procedures.
+
+        :param procname: The name of the procedure
+        :param args: Parameters for the procedure if need some. It Can also be empty.
+        :type args: tuple
+        :return: Results in a list. Can also be empty
+        :rtype: list
+        """
+
+        mydb = self.init_conn()
+        mycursor = mydb.cursor()
+
+        try:
+            mycursor.callproc(procname, args)
+        except (mysql.connector.Error, IOError) as err:
+            logger.error("Something goes wrong while calling a procedure: %s", err)
+            raise err
+
+        result = mycursor.fetchall()
+        mydb.close()
+        return result
