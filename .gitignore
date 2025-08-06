@@ -37,4 +37,6 @@ coverage.xml
 
 #Custom
 .idea/
-docs/
+Notizen.md
+settings.py
+
