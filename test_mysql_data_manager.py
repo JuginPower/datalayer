@@ -140,7 +140,7 @@ class TestMysqlDataManagerLive(unittest.TestCase):
     def test_query_update(self):
         """Testet die query-Methode für ein Update."""
         # Daten einfügen, die dann aktualisiert werden
-        self.data_manager.query("INSERT INTO users (name, email) VALUES ('Frank', 'frank@test.com');")
+        affected_rows = self.data_manager.query("INSERT INTO users (name, email) VALUES ('Frank', 'frank@test.com');")
 
         sql_query = "UPDATE users SET email = %s WHERE name = %s;"
         val = ('frank_new@test.com', 'Frank')
@@ -156,12 +156,12 @@ class TestMysqlDataManagerLive(unittest.TestCase):
     def test_call_proc(self):
         """Testet die call_proc-Methode."""
         # Testdaten einfügen
-        self.data_manager.query("INSERT INTO users (name, email) VALUES ('Grace', 'grace@test.com');")
+        affected_rows = self.data_manager.query("INSERT INTO users (name, email) VALUES ('Grace', 'grace@test.com');")
 
         # Prozedur aufrufen
         result = self.data_manager.call_proc("get_user_by_name", args=('Grace',))
 
-        self.assertEqual(len(result), 1)
+        self.assertEqual(len(result[0]), 3)
         self.assertEqual(result[0][1], 'Grace')
         self.assertEqual(result[0][2], 'grace@test.com')
 

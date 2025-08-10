@@ -118,13 +118,16 @@ class MysqlDataManager:
 
         mydb = self.init_conn()
         mycursor = mydb.cursor()
+        results = []
 
         try:
             mycursor.callproc(procname, args)
+            for result in mycursor.stored_results():
+                results.extend(result)
+
         except (mysql.connector.Error, IOError) as err:
             logger.error("Something goes wrong while calling a procedure: %s", err)
             raise err
 
-        result = mycursor.fetchall()
         mydb.close()
-        return result
+        return results
