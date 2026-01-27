@@ -65,13 +65,13 @@ class MysqlDataManager:
 
         try:
             cursor.execute(sqlstring)
+            result = cursor.fetchall()
+            return result
         except (mysql.connector.Error, IOError) as err:
             logger.error("Something goes wrong while selecting data: %s", err)
             raise err
-
-        result = cursor.fetchall()
-        mydb.close()
-        return result
+        finally:
+            mydb.close()
 
     def query(self, sqlstring, val=None) -> int:
 
@@ -96,13 +96,15 @@ class MysqlDataManager:
             elif not val:
                 mycursor.execute(sqlstring)
 
+            mydb.commit()
+            return mycursor.rowcount
+
         except (mysql.connector.Error, IOError) as err:
             logger.error("Something goes wrong while querying the data: %s", err)
             raise err
 
-        mydb.commit()
-        mydb.close()
-        return mycursor.rowcount
+        finally:
+            mydb.close()
 
     def call_proc(self, procname: str, args=()):
 
@@ -125,9 +127,11 @@ class MysqlDataManager:
             for result in mycursor.stored_results():
                 results.extend(result)
 
+            return results
+
         except (mysql.connector.Error, IOError) as err:
             logger.error("Something goes wrong while calling a procedure: %s", err)
             raise err
 
-        mydb.close()
-        return results
+        finally:
+            mydb.close()
