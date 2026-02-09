@@ -126,7 +126,7 @@ class MysqlDataManager:
             mycursor.callproc(procname, args)
             for result in mycursor.stored_results():
                 results.extend(result)
-
+            mydb.commit()
             return results
 
         except (mysql.connector.Error, IOError) as err:
