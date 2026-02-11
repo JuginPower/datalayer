@@ -23,36 +23,38 @@ class TestMysqlDataManagerLive(unittest.TestCase):
         cls.data_manager = MysqlDataManager(cls.db_config)
 
         try:
-            # Verbindung zur Datenbank herstellen
             conn = cls.data_manager.init_conn()
             cursor = conn.cursor()
 
-            # Tabelle für Tests erstellen
+            # Testtabelle
             cursor.execute("""
-                    CREATE TABLE IF NOT EXISTS users (
-                        id INT AUTO_INCREMENT PRIMARY KEY,
-                        name VARCHAR(255),
-                        email VARCHAR(255)
-                    );
-                """)
+                        CREATE TABLE IF NOT EXISTS users (
+                            id INT AUTO_INCREMENT PRIMARY KEY,
+                            name VARCHAR(255),
+                            email VARCHAR(255)
+                        );
+                    """)
 
-            # Prozedur für Tests erstellen
+            # Prozedur 1: SELECT (bereits vorhanden)
             cursor.execute("""
-                    CREATE OR REPLACE PROCEDURE get_user_by_name(IN uname VARCHAR(255))
-                    BEGIN
-                        SELECT id, name, email FROM users WHERE name = uname;
-                    END;
-                """)
+                        CREATE OR REPLACE PROCEDURE get_user_by_name(IN uname VARCHAR(255))
+                        BEGIN
+                            SELECT id, name, email FROM users WHERE name = uname;
+                        END;
+                    """)
+
+            # NEU: Prozedur 2: INSERT für den rowcount-Test
+            cursor.execute("""
+                        CREATE OR REPLACE PROCEDURE add_user_proc(IN uname VARCHAR(255), IN uemail VARCHAR(255))
+                        BEGIN
+                            INSERT INTO users (name, email) VALUES (uname, uemail);
+                        END;
+                    """)
+
             conn.commit()
             cursor.close()
             conn.close()
-
-            print("Testtabelle 'users' und Prozedur 'get_user_by_name' erfolgreich erstellt.")
-
         except mysql.connector.Error as err:
-            message = "Fehler bei der Vorbereitung der Testumgebung: %s"
-            logger.error(message, err)
-            print(message, err)
             raise err
 
     @classmethod
@@ -68,8 +70,9 @@ class TestMysqlDataManagerLive(unittest.TestCase):
             # Testtabelle löschen
             cursor.execute("DROP TABLE IF EXISTS users;")
 
-            # Prozedur löschen
+            # Prozeduren löschen
             cursor.execute("DROP PROCEDURE IF EXISTS get_user_by_name;")
+            cursor.execute("DROP PROCEDURE IF EXISTS add_user_proc;")
 
             conn.commit()
             cursor.close()
@@ -164,6 +167,16 @@ class TestMysqlDataManagerLive(unittest.TestCase):
         self.assertEqual(len(result[0]), 3)
         self.assertEqual(result[0][1], 'Grace')
         self.assertEqual(result[0][2], 'grace@test.com')
+
+    def test_call_proc_insert(self):
+        """Überprüft call_proc bei einer INSERT-Prozedur."""
+        # Aufruf der neuen Insert-Prozedur
+        res = self.data_manager.call_proc("add_user_proc", args=('Heinz', 'heinz@test.com'))
+        print(res)
+
+        # Validierung: rowcount muss > 0 sein
+        self.assertIsInstance(res, int)
+        self.assertGreater(res, 0, f"Erwartete rowcount > 0, aber erhielt {res}")
 
     def test_init_conn_retry(self):
         """

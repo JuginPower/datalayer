@@ -114,8 +114,8 @@ class MysqlDataManager:
         :param procname: The name of the procedure
         :param args: Parameters for the procedure if need some. It Can also be empty.
         :type args: tuple
-        :return: Results in a list. Can also be empty
-        :rtype: list
+        :return: Results in a list. Can also be empty or integer after writing action
+        :rtype: list | int
         """
 
         mydb = self.init_conn()
@@ -127,7 +127,8 @@ class MysqlDataManager:
             for result in mycursor.stored_results():
                 results.extend(result)
             mydb.commit()
-            return results
+            if len(results) > 0: return results
+            else: return mycursor.rowcount
 
         except (mysql.connector.Error, IOError) as err:
             logger.error("Something goes wrong while calling a procedure: %s", err)
