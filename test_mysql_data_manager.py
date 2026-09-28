@@ -1,8 +1,28 @@
 import unittest
-import mysql.connector
+import os
 import logging
+from pathlib import Path
+import mysql.connector
+from dotenv import load_dotenv
 from mysql_data_manager import MysqlDataManager
-from settings import mariadb_config
+
+# Die .env liegt im Wurzelverzeichnis des datapi-Projekts (eine Ebene über dem datalayer-Submodul).
+BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / '.env')
+
+# MariaDB-Konfiguration aus den Umgebungsvariablen der .env-Datei lesen.
+# Hinweis: Dieser Live-Test nutzt standardmäßig MARIADB_* (User 'datapi').
+# Auf der lokalen Entwicklungsmaschine existiert dieser User nicht -> dort
+# stattdessen die Test-Konfiguration MARIADB_TEST_* verwenden (User 'admin').
+mariadb_config = {
+    "host": os.getenv("MARIADB_HOST"),
+    "user": os.getenv("MARIADB_USER"),
+    "password": os.getenv("MARIADB_PASSWORD"),
+    "database": os.getenv("MARIADB_DATABASE"),
+}
+
+if not all(mariadb_config.values()):
+    raise RuntimeError("MariaDB-Konfiguration unvollständig – .env-Datei prüfen.")
 
 # Logging-Level für den Test anpassen, um die Ausgabe zu reduzieren
 logger = logging.getLogger(__name__)
