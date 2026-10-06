@@ -7,13 +7,13 @@ from dotenv import load_dotenv
 from mysql_data_manager import MysqlDataManager
 
 # Die .env liegt im Wurzelverzeichnis des datapi-Projekts (eine Ebene über dem datalayer-Submodul).
+# override=True: Die .env ist die verbindliche Konfigurationsquelle (siehe app.py).
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(BASE_DIR / '.env')
+load_dotenv(BASE_DIR / '.env', override=True)
 
 # MariaDB-Konfiguration aus den Umgebungsvariablen der .env-Datei lesen.
-# Hinweis: Dieser Live-Test nutzt standardmäßig MARIADB_* (User 'datapi').
-# Auf der lokalen Entwicklungsmaschine existiert dieser User nicht -> dort
-# stattdessen die Test-Konfiguration MARIADB_TEST_* verwenden (User 'admin').
+# Lokal zeigt die .env auf admin@localhost/finance_backup, die Produktiv-Zugangsdaten
+# liegen in der .env auf dem VPS.
 mariadb_config = {
     "host": os.getenv("MARIADB_HOST"),
     "user": os.getenv("MARIADB_USER"),
